@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Live classroom</title>
+<style>html,body,#meeting{width:100%;height:100%;margin:0;background:#061120;color:white;font-family:sans-serif} #status{padding:1rem}</style>
+<script src="https://source.zoom.us/6.10.0/lib/vendor/react.min.js"></script>
+<script src="https://source.zoom.us/6.10.0/lib/vendor/react-dom.min.js"></script>
+<script src="https://source.zoom.us/6.10.0/lib/vendor/redux.min.js"></script>
+<script src="https://source.zoom.us/6.10.0/lib/vendor/redux-thunk.min.js"></script>
+<script src="https://source.zoom.us/6.10.0/lib/vendor/react-redux.min.js"></script>
+<script src="https://source.zoom.us/6.10.0/lib/vendor/lodash.min.js"></script>
+<script src="https://source.zoom.us/zoom-meeting-embedded-6.10.0.min.js"></script>
+</head><body><div id="status" role="status">Preparing classroom…</div><div id="meeting"></div>
+<script>
+window.addEventListener('message', async function (event) {
+  if (event.origin !== window.location.origin || event.source !== window.parent || event.data?.type !== 'join-zoom') return;
+  const status = document.getElementById('status');
+  try {
+    if (!window.ZoomMtgEmbedded) throw new Error('Zoom Meeting SDK failed to load.');
+    const client = window.ZoomMtgEmbedded.createClient();
+    await client.init({ zoomAppRoot: document.getElementById('meeting'), language: 'en-US' });
+    await client.join(event.data.credentials);
+    status.style.display = 'none';
+    window.parent.postMessage({ type: 'zoom-host-joined' }, window.location.origin);
+  } catch (error) { status.textContent = 'Unable to join Zoom: ' + (error?.message || 'Please try again.'); }
+}, { once: true });
+</script></body></html>
